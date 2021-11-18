@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <random>
+#include <iterator>
 
 // Return a random float in the range 0.0 to 1.0.
 GLfloat randomFloat() {
@@ -42,9 +45,69 @@ public:
 	}
 };
 
+class Color {
+public:
+	float r;
+	float g;
+	float b;
+
+	Color() {
+		r = 0.0;
+		g = 0.0;
+		b = 0.0;
+	}
+
+	void generateColor() {
+		r = randomFloat();
+		g = randomFloat();
+		b = randomFloat();
+	}
+
+	void debugColor() {
+		std::cout << "r " << r << " g " << g << " b " << b << std::endl;
+	}
+};
+
+class ColorContainer {
+private:
+	std::vector<Color> colors;
+
+	template<typename Iter, typename RandomGenerator>
+	Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
+		std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+		std::advance(start, dis(g));
+		return start;
+	}
+
+	template<typename Iter>
+	Iter select_randomly(Iter start, Iter end) {
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		return select_randomly(start, end, gen);
+	}
+
+
+public:
+	void generateColors(int n) {
+		for (unsigned int i = 0; i < n; i++) {
+			Color color;
+			color.generateColor();
+			colors.emplace_back(color);
+		}
+	}
+
+	Color *getRandomColor() {
+		Color *color = &(*select_randomly(colors.begin(), colors.end()));
+		return color;
+	}
+};
+
+
+ColorContainer cnt;
+
 class Fish {
 private: 
-
+	
 	unsigned char bitmap[44] = {
   	0x00, 0x60, 0x01, 0x00,
   	0x00, 0x90, 0x01, 0x00,
@@ -59,26 +122,25 @@ private:
   	0x00, 0x0f, 0x00, 0xe0,
 	};
 
-	float color1;
-	float color2;
-	float color3;
+	Color *color;
 	Position position;
 	float speed;
 
 public:
 	Fish() {
-		generateColor();
-		speed = randomFloat() / 10;
+		speed = randomFloat() / 100;
 	}
 
-	void generateColor() {
-		color1 = randomFloat();
-		color2 = randomFloat();
-		color3 = randomFloat();
+	void setColor(Color *col) {
+		std::cout << "set color ";
+		col->debugColor();
+		color = col;
+		std::cout << "after set color ";
+		color->debugColor();
 	}
 
 	void draw() {
-		glColor3f(color1, color2, color3);
+		glColor3f(color->r , color->g, color->b);
 		position.setPosition();
 		glBitmap(27, 11, 0, 0, 0, 0, bitmap);
 	}
@@ -92,10 +154,13 @@ public:
 		position.moveLeft(speed);
 	}
 
+	void debug() {
+		color->debugColor();
+	}
+
 };
 
 
-unsigned int nFishes = 30;
 std::vector<Fish> fishes;
 
 // On reshape, uses an orthographic projection with world coordinates ranging
@@ -115,23 +180,35 @@ void display() {
 	  fishie.checkOutOfBounds();
   }
   glFlush();
-  usleep(250000);
+  usleep(50000);
 }
 
-void initFishes() {
-	for (int i = 0; i < nFishes; i++) {
+void initFishes(int n) {
+	cnt.generateColors(10);
+	Color *col;
+	for (int i = 0; i < n; i++) {
 		Fish fishie;
+		col = cnt.getRandomColor();
+		col->debugColor();
+		fishie.setColor(col);
 		fishes.push_back(fishie);
+	}
+	std::cout << std::endl;
+	for (auto &fishi : fishes) {
+		fishi.debug();
 	}
 }
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
+  int n = 500;
+  if (argc == 2) 
+  	n = atoi(argv[1]);
   glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
   glutInitWindowSize(800, 600);
   glutCreateWindow("Fishies");
   glutReshapeFunc(reshape);
   glutIdleFunc(display);
-  initFishes();
+  initFishes(n);
   glutMainLoop();
 }
