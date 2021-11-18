@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <random>
 #include <iterator>
+#include <cmath>
 
 // Return a random float in the range 0.0 to 1.0.
 GLfloat randomFloat() {
@@ -31,9 +32,10 @@ public:
 	void setPosition() {
 		glRasterPos3f(x, y, z);
 	}
-
+const double pi = std::acos(-1);
 	void moveLeft(float speed) {
 		x -= speed;
+		//y = std::sin(pi * x * 2);
 	}
 
 	float getX() {
@@ -61,10 +63,6 @@ public:
 		r = randomFloat();
 		g = randomFloat();
 		b = randomFloat();
-	}
-
-	void debugColor() {
-		std::cout << "r " << r << " g " << g << " b " << b << std::endl;
 	}
 };
 
@@ -132,11 +130,7 @@ public:
 	}
 
 	void setColor(Color *col) {
-		std::cout << "set color ";
-		col->debugColor();
 		color = col;
-		std::cout << "after set color ";
-		color->debugColor();
 	}
 
 	void draw() {
@@ -153,11 +147,6 @@ public:
 	void move() {
 		position.moveLeft(speed);
 	}
-
-	void debug() {
-		color->debugColor();
-	}
-
 };
 
 
@@ -183,32 +172,30 @@ void display() {
   usleep(50000);
 }
 
-void initFishes(int n) {
-	cnt.generateColors(10);
+void initFishes(int n, int colors) {
+	cnt.generateColors(colors);
 	Color *col;
 	for (int i = 0; i < n; i++) {
 		Fish fishie;
 		col = cnt.getRandomColor();
-		col->debugColor();
 		fishie.setColor(col);
 		fishes.push_back(fishie);
-	}
-	std::cout << std::endl;
-	for (auto &fishi : fishes) {
-		fishi.debug();
 	}
 }
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
   int n = 500;
-  if (argc == 2) 
+  int colors = 10;
+  if (argc > 1) 
   	n = atoi(argv[1]);
+  if (argc > 2)
+	colors = atoi(argv[2]);
   glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
   glutInitWindowSize(800, 600);
   glutCreateWindow("Fishies");
   glutReshapeFunc(reshape);
   glutIdleFunc(display);
-  initFishes(n);
+  initFishes(n, colors);
   glutMainLoop();
 }
