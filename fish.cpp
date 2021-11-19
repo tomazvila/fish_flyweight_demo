@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+ #include <GL/glut.h>
 #include <cstdlib>
 #include <unistd.h>
 #include <vector>
@@ -34,7 +34,7 @@ public:
 
 	void moveLeft(float speed) {
 		x -= speed;
-		//y = std::sin(pi * x * 2);
+		y = 0.01 * std::sin(pi * x * 4) + y;
 	}
 
 	float getX() {
@@ -172,7 +172,7 @@ void display() {
 	  fishie.checkOutOfBounds();
   }
   glFlush();
-  usleep(50000);
+  usleep(5000);
 }
 
 void initFishes(int n, int colors) {
