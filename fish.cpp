@@ -48,7 +48,7 @@ public:
 
 class Color {
 private:
-	int *spaceTaker;
+	int *spaceTaker = nullptr;
 public:
 	float r;
 	float g;
@@ -66,9 +66,7 @@ public:
 		g = randomFloat();
 		b = randomFloat();
 	}
-	~Color() {
-		free(spaceTaker);
-	}
+
 };
 
 class ColorContainer {
@@ -95,7 +93,7 @@ public:
 		for (unsigned int i = 0; i < n; i++) {
 			Color color;
 			color.generateColor();
-			colors.emplace_back(color);
+			colors.push_back(color);
 		}
 	}
 
