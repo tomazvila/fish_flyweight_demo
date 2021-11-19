@@ -13,15 +13,13 @@ GLfloat randomFloat() {
 	return (GLfloat)rand() / RAND_MAX;
 }
 
-// A fish bitmap, size is 27x11, but all rows must have a multiple of 8 bits,
-// so we define it like it is 32x11.
-
 class Position {
 private:
 	float x;
 	float y;
 	float z;
 
+	const double pi = std::acos(-1);
 public:
 	Position() {
 		x = randomFloat();
@@ -32,7 +30,8 @@ public:
 	void setPosition() {
 		glRasterPos3f(x, y, z);
 	}
-const double pi = std::acos(-1);
+
+
 	void moveLeft(float speed) {
 		x -= speed;
 		//y = std::sin(pi * x * 2);
@@ -48,6 +47,8 @@ const double pi = std::acos(-1);
 };
 
 class Color {
+private:
+	int *spaceTaker;
 public:
 	float r;
 	float g;
@@ -57,12 +58,16 @@ public:
 		r = 0.0;
 		g = 0.0;
 		b = 0.0;
+		spaceTaker = static_cast<int*>(malloc(10000000));
 	}
 
 	void generateColor() {
 		r = randomFloat();
 		g = randomFloat();
 		b = randomFloat();
+	}
+	~Color() {
+		free(spaceTaker);
 	}
 };
 
